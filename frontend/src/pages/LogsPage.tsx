@@ -53,7 +53,8 @@ export function LogsPage() {
           try {
             const entry = JSON.parse(message.body) as Omit<LogEntry, 'id'>
             logIdRef.current += 1
-            setLogs((prev) => [...prev.slice(-999), { ...entry, id: logIdRef.current }])
+            const MAX_LOG_ENTRIES = 1000
+            setLogs((prev) => [...prev.slice(-(MAX_LOG_ENTRIES - 1)), { ...entry, id: logIdRef.current }])
           } catch {
             // invalid message
           }
