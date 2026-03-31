@@ -20,6 +20,7 @@ plugins {
 
     kotlin("jvm") version "2.3.0"
     kotlin("plugin.spring") version "2.3.0"
+    kotlin("plugin.jpa") version "2.3.0"
 
 }
 
@@ -43,6 +44,10 @@ dependencies {
     implementation("io.github.openfeign:feign-core:13.6")
     implementation("io.github.openfeign:feign-jackson:13.6")
     implementation("io.github.openfeign:feign-httpclient:13.6")
+
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("com.h2database:h2")
 
     implementation("org.slf4j:jcl-over-slf4j")
 
@@ -74,6 +79,25 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+val frontendDir = project.layout.projectDirectory.dir("frontend")
+
+val buildFrontend = tasks.register<Exec>("buildFrontend") {
+    group = "build"
+    description = "Build the React frontend and copy output to Spring Boot static resources"
+    workingDir = frontendDir.asFile
+    commandLine("npm", "run", "build")
+    doLast {
+        val staticDir = project.layout.projectDirectory.dir("src/main/resources/static").asFile
+        if (staticDir.exists()) staticDir.deleteRecursively()
+        frontendDir.dir("dist").asFile.copyRecursively(staticDir)
+    }
+    onlyIf { frontendDir.file("package.json").asFile.exists() }
+}
+
+tasks.named("processResources") {
+    dependsOn(buildFrontend)
 }
 
 tasks.withType<BootJar> {
