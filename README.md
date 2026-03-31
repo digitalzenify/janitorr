@@ -93,7 +93,7 @@ services:
     mem_limit: 256M
     mem_swappiness: 0
     ports:
-      - "8080:8080"          # optional – only needed if you want to reach the web UI directly
+      - "6247:6247"          # optional – only needed if you want to reach the web UI directly
     volumes:
       - /appdata/janitorr/config/application.yml:/config/application.yml  # required config
       - /appdata/janitorr/logs:/logs                                       # optional log directory
@@ -115,6 +115,75 @@ For very memory-constrained hosts you can tune the JVM:
 ```
 JAVA_TOOL_OPTIONS=-Xms10m -Xmx30m -XX:+UseSerialGC -XX:MaxMetaspaceSize=20M -XX:ReservedCodeCacheSize=10M -Xss150K
 ```
+
+---
+
+## Deployment
+
+### Docker Compose
+
+A ready-to-use `docker-compose.yml` for Janitorr:
+
+```yaml
+version: '3.8'
+services:
+  janitorr:
+    image: ghcr.io/digitalzenify/janitorr:latest
+    container_name: janitorr
+    ports:
+      - "6247:6247"
+    volumes:
+      - ./config:/config
+    environment:
+      - TZ=Europe/Bucharest
+    restart: unless-stopped
+```
+
+Place your `application.yml` (copied from [`src/main/resources/application-template.yml`](src/main/resources/application-template.yml) and filled in with your API keys) inside the `./config/` directory before starting the container.
+
+### CasaOS
+
+1. Open the CasaOS dashboard and go to **App Store → Custom Install**.
+2. Set the image to `ghcr.io/digitalzenify/janitorr:latest`.
+3. Under **Ports**, map container port `6247` to host port `6247` (or any free port you prefer).
+4. Under **Volumes**, add a volume mount: choose a host path (e.g. `/DATA/AppData/janitorr/config`) and map it to `/config` inside the container.
+5. Under **Environment Variables**, add `TZ` set to your timezone (e.g. `Europe/Bucharest`).
+6. Click **Install** and wait for the container to start.
+7. Access the UI at `http://<server-ip>:<host-port>` (e.g. `http://192.168.1.100:6247`).
+
+Place your configured `application.yml` inside the host path you mapped to `/config` before starting.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `TZ` | `UTC` | Container timezone. Example: `Europe/Bucharest` |
+| `SERVER_PORT` | `6247` | Override the web UI port via Spring Boot's relaxed binding (`SERVER_PORT` → `server.port`). |
+| `JAVA_TOOL_OPTIONS` | *(unset)* | Override JVM flags (e.g. heap size, GC settings). |
+| `SPRING_CONFIG_ADDITIONAL_LOCATION` | `optional:/config/application.yml` | Additional Spring Boot config path inside the container. |
+
+For memory-constrained hosts you can tune the JVM via `JAVA_TOOL_OPTIONS`:
+```
+JAVA_TOOL_OPTIONS=-Xms10m -Xmx30m -XX:+UseSerialGC -XX:MaxMetaspaceSize=20M -XX:ReservedCodeCacheSize=10M -Xss150K
+```
+
+### Volumes
+
+| Container path | Purpose |
+|---|---|
+| `/config` | Stores your `application.yml` (connection settings, API keys, and all Janitorr preferences). Mount a persistent host directory here so your configuration survives container recreations. |
+
+> **Note:** The H2 database used by Janitorr (cleanup rules and history) is written to `./data/janitorr-db` relative to the working directory inside the container (`/app`), resulting in the absolute path `/app/data/janitorr-db`. If you want to persist this data, map an additional volume (e.g. `./data:/app/data`) or switch to an external database in `application.yml`.
+
+### Accessing the UI
+
+After deployment, open the web interface at:
+
+```
+http://<your-server-ip>:6247
+```
+
+On first launch you will be guided through connecting your Jellyfin, Radarr, Sonarr, and Jellyseerr instances.
 
 ---
 
