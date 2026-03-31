@@ -28,7 +28,7 @@ const emptyForm: RuleForm = {
   name: '',
   description: '',
   mediaType: 'movie',
-  cronExpression: '0 0 3 * * ?',
+  cronExpression: '0 0 3 * * *',
   gracePeriodDays: 14,
   conditions: [],
   actions: ['delete'],
@@ -130,7 +130,7 @@ export function RuleEditorPage() {
           <CardContent className="space-y-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">Cron Expression</label>
-              <Input value={form.cronExpression} onChange={(e) => updateField('cronExpression', e.target.value)} placeholder="0 0 3 * * ?" />
+              <Input value={form.cronExpression} onChange={(e) => updateField('cronExpression', e.target.value)} placeholder="0 0 3 * * *" />
               <p className="mt-1 text-xs text-muted-foreground">Standard cron format for scheduling runs</p>
             </div>
             <div>

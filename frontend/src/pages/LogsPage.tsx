@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Client } from '@stomp/stompjs'
 
+const MAX_LOG_ENTRIES = 1000
+
 interface LogEntry {
   id: number
   timestamp: string
@@ -53,7 +55,6 @@ export function LogsPage() {
           try {
             const entry = JSON.parse(message.body) as Omit<LogEntry, 'id'>
             logIdRef.current += 1
-            const MAX_LOG_ENTRIES = 1000
             setLogs((prev) => [...prev.slice(-(MAX_LOG_ENTRIES - 1)), { ...entry, id: logIdRef.current }])
           } catch {
             // invalid message

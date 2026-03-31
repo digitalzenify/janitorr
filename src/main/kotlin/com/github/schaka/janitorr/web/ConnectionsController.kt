@@ -101,7 +101,7 @@ class ConnectionsController(
                 .GET()
                 .build()
             val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-            val reachable = response.statusCode() in 200..499
+            val reachable = response.statusCode() in 200..299
 
             ResponseEntity.ok(
                 ConnectionStatus(service, url, enabled, reachable, "HTTP ${response.statusCode()}")

@@ -56,9 +56,12 @@ class LogController {
 
     @GetMapping("/download/{filename}")
     fun downloadLogFile(@PathVariable filename: String): ResponseEntity<Resource> {
-        // Prevent path traversal
+        // Reject any filename containing path separators or parent directory references
+        if (filename.contains("..") || filename.contains('/') || filename.contains('\\')) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filename")
+        }
         val sanitized = Path.of(filename).fileName.toString()
-        if (sanitized != filename || filename.contains("..")) {
+        if (sanitized != filename) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filename")
         }
 

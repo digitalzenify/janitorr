@@ -44,9 +44,8 @@ class HistoryController(
     @GetMapping("/summary")
     fun getSummary(): ResponseEntity<HistorySummary> {
         val totalItems = historyRepository.count()
-        val allEntries = historyRepository.findAll()
-        val storageFreed = allEntries.sumOf { it.fileSizeBytes }
-        val mostActiveRule = allEntries
+        val storageFreed = historyRepository.sumFileSizeBytes()
+        val mostActiveRule = historyRepository.findTop20ByOrderByTimestampDesc()
             .mapNotNull { it.ruleName }
             .groupingBy { it }
             .eachCount()
