@@ -58,6 +58,6 @@ RUN chown janitorr:janitorr /app/janitorr.jar
 
 USER janitorr
 
-EXPOSE 8080
+EXPOSE 6247
 
 ENTRYPOINT ["java", "-Dspring.config.additional-location=optional:/config/application.yml", "-jar", "/app/janitorr.jar"]
