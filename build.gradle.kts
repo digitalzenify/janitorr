@@ -102,6 +102,7 @@ tasks.named("processResources") {
 
 tasks.withType<BootJar> {
     archiveClassifier.set("")
+    archiveFileName.set("janitorr.jar")
 }
 
 tasks.named<Jar>("jar") {

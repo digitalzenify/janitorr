@@ -69,6 +69,55 @@ Before you create a new issue, please check previous issues to make sure nobody 
 
 If you have any questions, consult the [FAQ section](https://github.com/Schaka/janitorr/wiki/FAQ) before starting a [new discussion](https://github.com/Schaka/janitorr/discussions).
 
+## Getting Started
+
+### Pulling the image
+
+```bash
+docker pull ghcr.io/digitalzenify/janitorr:latest
+```
+
+Available tags:
+- `latest` — most recent stable release
+- `v1.0.0` / `1.0.0` / `1.0` / `1` — pinned to a specific release
+- `dev` — latest build from the `main` branch (may be unstable)
+
+### Minimal docker-compose example
+
+```yml
+services:
+  janitorr:
+    container_name: janitorr
+    image: ghcr.io/digitalzenify/janitorr:latest
+    user: 1000:1000          # run as your local user so it can read/write config
+    mem_limit: 256M
+    mem_swappiness: 0
+    ports:
+      - "8080:8080"          # optional – only needed if you want to reach the web UI directly
+    volumes:
+      - /appdata/janitorr/config/application.yml:/config/application.yml  # required config
+      - /appdata/janitorr/logs:/logs                                       # optional log directory
+      - /share_media:/data                                                  # media library root
+    restart: unless-stopped
+```
+
+Copy [`src/main/resources/application-template.yml`](src/main/resources/application-template.yml)
+to `/appdata/janitorr/config/application.yml` and fill in your API keys before starting.
+
+### Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `JAVA_TOOL_OPTIONS` | *(unset)* | Override JVM flags (e.g. heap size, GC settings). |
+| `SPRING_CONFIG_ADDITIONAL_LOCATION` | `optional:/config/application.yml` | Additional Spring config path inside the container. |
+
+For very memory-constrained hosts you can tune the JVM:
+```
+JAVA_TOOL_OPTIONS=-Xms10m -Xmx30m -XX:+UseSerialGC -XX:MaxMetaspaceSize=20M -XX:ReservedCodeCacheSize=10M -Xss150K
+```
+
+---
+
 ## Setup
 
 Currently, the code is only published as a docker image to [GitHub](https://github.com/Schaka/janitorr/pkgs/container/janitorr).
