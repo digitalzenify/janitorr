@@ -81,6 +81,25 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+val frontendDir = project.layout.projectDirectory.dir("frontend")
+
+val buildFrontend = tasks.register<Exec>("buildFrontend") {
+    group = "build"
+    description = "Build the React frontend and copy output to Spring Boot static resources"
+    workingDir = frontendDir.asFile
+    commandLine("npm", "run", "build")
+    doLast {
+        val staticDir = project.layout.projectDirectory.dir("src/main/resources/static").asFile
+        if (staticDir.exists()) staticDir.deleteRecursively()
+        frontendDir.dir("dist").asFile.copyRecursively(staticDir)
+    }
+    onlyIf { frontendDir.file("package.json").asFile.exists() }
+}
+
+tasks.named("processResources") {
+    dependsOn(buildFrontend)
+}
+
 tasks.withType<BootJar> {
     archiveClassifier.set("")
 }
